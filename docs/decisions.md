@@ -1,0 +1,168 @@
+# decisions.md — Architecture Decision Records
+
+## Purpose
+
+Every non-obvious technical decision is logged here with context,
+rationale, and consequences. This prevents re-debating settled
+questions and provides audit trail for future reference.
+
+Format: Each decision gets a unique ID, date, and status.
+Status: `Accepted` | `Superseded by DXXX` | `Rejected`
+
+---
+
+## D001: SMTP + App Password Over Gmail API OAuth2
+**Date:** [DATE]
+**Context:** Gmail API OAuth2 tokens expire every 7 days when the
+Google Cloud project is in "Testing" mode. Verified/published status
+requires a domain and privacy policy we don't have. Pipeline runs
+unattended daily — a 7-day token expiry means silent failure every
+Monday.
+**Decision:** Use `smtplib` with Gmail App Password for sending,
+`imaplib` with same App Password for reply tracking.
+**Consequence:** Lose Gmail thread ID tracking. Reply matching uses
+subject line prefix (`Re:`) and sender domain instead. At 5 emails/day
+this is reliable. App Passwords never expire.
+**Status:** Accepted
+
+---
+
+## D002: Dedicated Outreach Gmail Over Primary Email
+**Date:** [DATE]
+**Context:** If any recipient marks a cold email as spam, Gmail may
+restrict or lock the sending account. Primary email is used for
+college, job applications, password resets — losing it is catastrophic.
+**Decision:** Create a separate Gmail account exclusively for outreach.
+Primary email is never used for cold sending.
+**Consequence:** Must manage two Gmail accounts. Summary emails are
+sent FROM outreach account TO primary account for monitoring.
+**Status:** Accepted
+
+---
+
+## D003: Top-N Ranking Over Fixed Threshold
+**Date:** [DATE]
+**Context:** A fixed cosine similarity threshold (e.g., >0.6) is
+fragile. On days with many good jobs, it lets too many through.
+On slow days, it lets nothing through. The threshold itself needs
+tuning data we don't have yet.
+**Decision:** Always take top N jobs regardless of absolute score.
+N = 25 (to account for ~20-30% email-finding success rate, targeting
+5 sends/day).
+**Consequence:** Some low-relevance jobs may be contacted on slow days.
+Acceptable — a mediocre lead contacted is better than zero emails sent.
+**Status:** Accepted
+
+---
+
+## D004: DuckDuckGo Over Google For Search Queries
+**Date:** [DATE]
+**Context:** Google actively blocks automated queries with CAPTCHAs
+and IP bans. GitHub Actions runs on well-known Azure IP ranges that
+are pre-flagged by Google.
+**Decision:** Use DuckDuckGo for all programmatic search queries.
+Max 10 queries per run, 5-10 second delays between queries.
+**Consequence:** Slightly worse search result quality than Google.
+Acceptable tradeoff for zero block risk.
+**Status:** Accepted
+
+---
+
+## D005: Remove SMTP Email Verification
+**Date:** [DATE]
+**Context:** SMTP verification (RCPT TO check) requires connecting
+to the target company's mail server. GitHub Actions IPs are on
+Azure ranges that are widely blacklisted by mail servers. Most
+responses would be connection refused, timeout, or false positives
+from catch-all servers.
+**Decision:** Remove SMTP verification entirely. Verification stack
+is: direct find → Gravatar MD5 → default pattern (firstname@domain).
+**Consequence:** Higher bounce rate on permutation-guessed emails.
+Mitigated by bounce detection and the 5% bounce rate circuit breaker.
+**Status:** Accepted
+
+---
+
+## D006: Remove WellFound Automated Scraping
+**Date:** [DATE]
+**Context:** WellFound uses Cloudflare with aggressive bot detection
+and JavaScript challenges. GitHub Actions IPs are among the first
+blocked. Playwright with rotated user agents is insufficient.
+**Decision:** Remove WellFound from automated scraping. Replace with
+`manual_queue.json` — browse WellFound manually once per week, add
+5-10 interesting companies to the file.
+**Consequence:** Requires 10 minutes of manual work per week. Produces
+higher quality targets than automated scraping because human judgment
+is applied.
+**Status:** Accepted
+
+---
+
+## D007: SQLite Over Any Other Database
+**Date:** [DATE]
+**Context:** Zero budget, no server, state must persist in a Git
+repository (committed after each GitHub Actions run). SQLite is a
+single file, requires zero setup, zero cost, and can be committed
+to Git.
+**Decision:** SQLite as sole database. File: `state.db`.
+Backup before every run: `state.db.backup`.
+**Consequence:** No concurrent writes (fine — single daily run).
+File size grows linearly but at 5 emails/day, will take years to
+reach any meaningful size.
+**Status:** Accepted
+
+---
+
+## D008: Fallback Templates For Gemini Failure
+**Date:** [DATE]
+**Context:** Gemini free tier may change terms, have outages, or
+rate-limit differently without notice. If email generation breaks,
+the entire pipeline produces zero output for that day.
+**Decision:** Maintain 3-4 hardcoded fallback templates in
+`writer/fallback.py`. If Gemini fails, randomly select a template,
+fill placeholders, and send. Log warning.
+**Consequence:** Fallback emails are less personalized (no
+company-specific reference from JD analysis). Still better than
+zero emails.
+**Status:** Accepted
+
+---
+
+## D009: One Follow-Up Maximum Per Contact
+**Date:** [DATE]
+**Context:** Follow-ups generate 40-60% of cold email replies. But
+multiple follow-ups to the same person cross the line from persistence
+to harassment, especially from a student seeking internships.
+**Decision:** Exactly one follow-up per contact. Sent 4-5 business
+days after initial email. Uses hardcoded template (no Gemini). Never
+sent if bounced, opted out, or already replied.
+**Consequence:** Leaves some potential replies on the table from a
+hypothetical second follow-up. Acceptable — reputation protection
+outweighs marginal reply gain.
+**Status:** Accepted
+
+---
+
+## D010: GitHub Actions As Production Runtime
+**Date:** [DATE]
+**Context:** Zero budget means no VPS, no cloud server, no always-on
+machine. GitHub Actions free tier provides 2000 minutes/month of
+compute on Ubuntu runners with network access.
+**Decision:** Use GitHub Actions as the sole production runtime.
+Cron-triggered daily workflow.
+**Consequence:** Gray area in GitHub TOS (intended for CI/CD, not
+general automation). At our volume (~180 min/month), unlikely to
+trigger enforcement. Fallback plan: Windows Task Scheduler on local
+laptop if GitHub sends a warning.
+**Status:** Accepted
+
+---
+
+## Template For New Decisions
+
+## DXXX: [Title]
+**Date:** [DATE]
+**Context:** [What situation or problem prompted this decision]
+**Decision:** [What was decided]
+**Consequence:** [What tradeoffs this creates]
+**Status:** Accepted | Superseded by DXXX | Rejected
