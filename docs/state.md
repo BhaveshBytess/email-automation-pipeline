@@ -4,13 +4,13 @@
 
 ---
 
-## Current Module: Module 3 — Gmail SMTP Sender
+## Current Module: Module 4 — Finder Waterfall
 
 ## Completed Modules:
 - [x] Module 0: SQLite schema + tests
 - [x] Module 1: RSS scraper + manual queue
 - [x] Module 2: Gemini writer + fallback templates
-- [ ] Module 3: SMTP sender + summary email
+- [x] Module 3: SMTP sender + summary email
 - [ ] Module 4: Finder waterfall + role match
 - [ ] Module 5: MiniLM ranker
 - [ ] Module 6: Reply tracker
@@ -37,6 +37,14 @@
 - Dependency added: `google-generativeai`
 - Resume bullets from agent_project.md Section 6 hardcoded as `_RESUME_BULLETS`
 
+## Module 3 Results:
+- `src/sender/smtp.py`: 6 functions — `should_skip_today`, `get_warmup_limit`, `send_email`, `process_queue`, `send_follow_ups`, `send_summary`
+- Transactional queue processing: mark_sent + insert_contact wrapped in BEGIN/COMMIT with rollback on failure
+- FC-04 compliant: SMTP failures leave emails as 'pending', summary falls back to stdout
+- Unsubscribe line appended to every outgoing body
+- 15/15 tests passing (3 weekend + 10 warmup + 1 unsubscribe + 1 queue limit)
+- No new dependencies (stdlib smtplib only)
+
 ## Outreach Gmail Account:
 - [ ] Created
 - [ ] 2FA enabled
@@ -59,11 +67,14 @@
 - `src/writer/__init__.py`
 - `src/writer/gemini.py`
 - `src/writer/fallback.py`
+- `src/sender/__init__.py`
+- `src/sender/smtp.py`
 - `data/manual_queue.json`
 - `tests/__init__.py`
 - `tests/test_db.py`
 - `tests/test_scraper.py`
 - `tests/test_writer.py`
+- `tests/test_sender.py`
 
 ## Session Log:
 | Date       | Session # | What Was Done                          | What Remains                    |
@@ -71,6 +82,7 @@
 | 2026-03-24 | 1         | Module 0: SQLite schema + 8/8 tests   | Module 1: RSS scraper + manual  |
 | 2026-03-25 | 2         | Module 1: RSS scraper + 5/5 tests     | Module 2: Gemini writer         |
 | 2026-03-25 | 3         | Module 2: Gemini writer + 6/6 tests   | Module 3: SMTP sender           |
+| 2026-03-25 | 4         | Module 3: SMTP sender + 15/15 tests   | Module 4: Finder waterfall      |
 
 ---
 

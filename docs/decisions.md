@@ -184,6 +184,8 @@ Finder waterfall gets domain directly.
 **Status:** Accepted
 
 ---
+
+---
 ## Template For New Decisions
 
 ## DXXX: [Title]
