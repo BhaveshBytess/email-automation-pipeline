@@ -45,22 +45,52 @@ SQLite state. 5 emails/day max.
 
 [EDIT THIS SECTION BEFORE EACH SESSION]
 
-**Task:** Build Module 0 — SQLite schema and helper functions.
+**Task:** Build Module 1 — RSS Scraper + Manual Queue
 
-**What exists:** Nothing yet. Fresh start.
+**What exists:**
+- `src/db/schema.py` — fully implemented, 8/8 tests passing
+- `src/db/__init__.py`, `src/__init__.py`, `tests/__init__.py`
 
 **What needs to happen this session:**
-- Create `src/db/schema.py` with all table definitions per contracts.md Section 3
-- Implement all helper functions per build_plan.md Module 0
-- Create `tests/test_db.py` with tests per contracts.md Section 6.1
-- All tests passing
+- Create `src/scraper/rss.py`:
+  - `fetch_rss(feed_url: str, source_name: str) -> list[dict]`
+  - `fetch_all_rss() -> list[dict]`
+  - Feeds: RemoteOK, We Work Remotely, Jobspresso
+  - Filter by keywords: ML, AI, machine learning, backend, 
+    Python, NLP, deep learning, data engineering
+  - Each returned dict must have: title, company, url, 
+    source, jd_summary, job_id (SHA-256 hash of url)
+  - Malformed XML returns empty list, no crash
 
-**Relevant contract sections:** contracts.md Section 3 (full schema), Section 6.1 (test specs)
+- Create `src/scraper/manual.py`:
+  - `load_manual_queue(filepath: str) -> list[dict]`
+  - Handles missing file, empty file, malformed JSON 
+    gracefully — returns empty list, logs warning
+
+- Create `src/scraper/__init__.py` — empty package marker
+
+- Create `data/manual_queue.json` — empty array `[]` as starter
+
+- Create `tests/test_scraper.py` with tests per 
+  contracts.md Section 6.2
+
+**Relevant contract sections:**
+- contracts.md Section 3.1 (jobs_seen schema — 
+  returned dicts must match this structure)
+- contracts.md Section 3.6 (enumerated source values)
+- contracts.md Section 6.2 (test specifications)
 
 **Constraints:**
-- Python 3.10+, sqlite3 standard library only
-- No ORM. Raw SQL with parameterized queries.
-- All timestamps as ISO-8601 UTC strings.
+- feedparser for RSS parsing (only new dependency)
+- requests + BeautifulSoup for any HTTP (already in stack)
+- No Playwright in this module
+- job_id = SHA-256 hash of url if url exists, 
+  else hash of title + company
+- discovered_at = ISO-8601 UTC string
+- source must be one of: rss_remoteok, rss_wwr, 
+  rss_jobspresso, manual
+- All timestamps: datetime.now(timezone.utc).isoformat()
+  NOT datetime.utcnow()
 
 ---
 

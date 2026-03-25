@@ -158,6 +158,20 @@ laptop if GitHub sends a warning.
 
 ---
 
+## D011: SQLite Online Backup API Over shutil.copy2
+**Date:** [TODAY]
+**Context:** WAL mode keeps unflushed writes in a separate -wal 
+file. shutil.copy2 only copies the main db file — backup would 
+be incomplete or inconsistent.
+**Decision:** Use sqlite3.Connection.backup() API for all 
+database backups.
+**Consequence:** Backup is always a consistent snapshot 
+regardless of journal state.
+**Status:** Accepted
+
+---
+
+
 ## Template For New Decisions
 
 ## DXXX: [Title]
