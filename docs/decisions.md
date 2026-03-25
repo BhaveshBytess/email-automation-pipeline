@@ -171,7 +171,19 @@ regardless of journal state.
 
 ---
 
+## D012: Manual Queue Required Keys — company, domain, jd_summary
+**Date:** [TODAY]
+**Context:** Agent initially validated for title+company+url 
+but manual entries are operator-added and don't always have 
+a url. Domain is more useful than url for the finder waterfall.
+**Decision:** Required keys = company, domain, jd_summary. 
+url and title optional. job_id = SHA-256(url) if url exists 
+else SHA-256(company+domain).
+**Consequence:** Manual queue is simpler to fill in. 
+Finder waterfall gets domain directly.
+**Status:** Accepted
 
+---
 ## Template For New Decisions
 
 ## DXXX: [Title]

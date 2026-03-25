@@ -4,12 +4,12 @@
 
 ---
 
-## Current Module: Module 2 — Gemini Writer + Fallback Templates
+## Current Module: Module 3 — Gmail SMTP Sender
 
 ## Completed Modules:
 - [x] Module 0: SQLite schema + tests
 - [x] Module 1: RSS scraper + manual queue
-- [ ] Module 2: Gemini writer + fallback templates
+- [x] Module 2: Gemini writer + fallback templates
 - [ ] Module 3: SMTP sender + summary email
 - [ ] Module 4: Finder waterfall + role match
 - [ ] Module 5: MiniLM ranker
@@ -29,7 +29,13 @@
 - `data/manual_queue.json`: Starter file (empty array)
 - 5/5 tests passing per contracts.md Section 6.2
 - Dependency added: `feedparser`
-- Manual entry schema: job_id = SHA-256(url) if url exists, else SHA-256(company+domain); title defaults to company name
+
+## Module 2 Results:
+- `src/writer/gemini.py`: Gemini API email writer with structured prompt, post-generation validation (word count ≤ 150, banned phrases, company name, subject count), retry once if over limit, auto-fallback
+- `src/writer/fallback.py`: 4 hardcoded templates, `.format()` placeholders, all < 150 words
+- 6/6 tests passing per contracts.md Section 6.4
+- Dependency added: `google-generativeai`
+- Resume bullets from agent_project.md Section 6 hardcoded as `_RESUME_BULLETS`
 
 ## Outreach Gmail Account:
 - [ ] Created
@@ -50,16 +56,21 @@
 - `src/scraper/__init__.py`
 - `src/scraper/rss.py`
 - `src/scraper/manual.py`
+- `src/writer/__init__.py`
+- `src/writer/gemini.py`
+- `src/writer/fallback.py`
 - `data/manual_queue.json`
 - `tests/__init__.py`
 - `tests/test_db.py`
 - `tests/test_scraper.py`
+- `tests/test_writer.py`
 
 ## Session Log:
 | Date       | Session # | What Was Done                          | What Remains                    |
 |------------|-----------|----------------------------------------|---------------------------------|
 | 2026-03-24 | 1         | Module 0: SQLite schema + 8/8 tests   | Module 1: RSS scraper + manual  |
 | 2026-03-25 | 2         | Module 1: RSS scraper + 5/5 tests     | Module 2: Gemini writer         |
+| 2026-03-25 | 3         | Module 2: Gemini writer + 6/6 tests   | Module 3: SMTP sender           |
 
 ---
 

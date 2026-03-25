@@ -45,52 +45,79 @@ SQLite state. 5 emails/day max.
 
 [EDIT THIS SECTION BEFORE EACH SESSION]
 
-**Task:** Build Module 1 — RSS Scraper + Manual Queue
+**Task:** Build Module 2 — Email Writer (Gemini + Fallback Templates)
 
 **What exists:**
-- `src/db/schema.py` — fully implemented, 8/8 tests passing
-- `src/db/__init__.py`, `src/__init__.py`, `tests/__init__.py`
+- `src/db/schema.py` — 17 helper functions, 8/8 tests passing
+- `src/scraper/rss.py` — RSS fetcher, keyword filter, SHA-256 IDs
+- `src/scraper/manual.py` — manual queue loader
+- Full suite: 13/13 tests passing
 
 **What needs to happen this session:**
-- Create `src/scraper/rss.py`:
-  - `fetch_rss(feed_url: str, source_name: str) -> list[dict]`
-  - `fetch_all_rss() -> list[dict]`
-  - Feeds: RemoteOK, We Work Remotely, Jobspresso
-  - Filter by keywords: ML, AI, machine learning, backend, 
-    Python, NLP, deep learning, data engineering
-  - Each returned dict must have: title, company, url, 
-    source, jd_summary, job_id (SHA-256 hash of url)
-  - Malformed XML returns empty list, no crash
+- Create `src/writer/gemini.py`:
+  - `generate_email(person_name, person_title, company, 
+    jd_summary, resume_bullets) -> dict`
+  - Returns: `{"subject_options": [str, str, str], "body": str}`
+  - Gemini API call with prompt constraints enforced in code
+  - Post-generation word count validation — if body > 150 words,
+    retry once, then fall back to template
+  - On any Gemini failure → call generate_fallback(), log warning
 
-- Create `src/scraper/manual.py`:
-  - `load_manual_queue(filepath: str) -> list[dict]`
-  - Handles missing file, empty file, malformed JSON 
-    gracefully — returns empty list, logs warning
+- Create `src/writer/fallback.py`:
+  - `generate_fallback(person_name, company, relevant_skill,
+    project_name, project_desc) -> dict`
+  - Returns same structure as gemini.py
+  - 3-4 hardcoded templates, randomly selected
+  - All placeholders must fill without KeyError
 
-- Create `src/scraper/__init__.py` — empty package marker
+- Create `src/writer/__init__.py` — empty package marker
 
-- Create `data/manual_queue.json` — empty array `[]` as starter
+- Create `tests/test_writer.py` with tests per
+  contracts.md Section 6.4
 
-- Create `tests/test_scraper.py` with tests per 
-  contracts.md Section 6.2
+**Gemini prompt constraints (enforce in code, not just prompt):**
+- Plain text only, no markdown, no bullet points
+- Max 150 words in body (validate post-generation)
+- No "I hope this email finds you well"
+- No "passionate", "synergy", "leverage"
+- Must contain company name
+- Must reference one resume project
+- Vary sentence length
+- Alternate opening styles
+- One casual phrase per email
+- Human tone — typed fast, not templated
+- Structural variation per email
+
+**Subject line:**
+- Gemini generates exactly 3 options
+- Vary structure: question / statement / name drop
+- subject_options list must have exactly 3 items
+- Validated post-generation
+
+**Resume bullets to inject (from agent_project.md Section 6):**
+1. Built temporal GNN (TRDGNN) achieving 0.58 PR-AUC on 
+   203K-node fraud detection graph — PyTorch Geometric, XGBoost
+2. PDF-to-JSON pipeline with 100% JSON validity and 81% 
+   evidence precision — LLMs, Pydantic, Gemma, DeepSeek
+3. 10x GNN parameter reduction (500K→50K) with +108% 
+   performance gain on resource-constrained systems
+4. Python, PyTorch, PyG, TensorFlow, scikit-learn, Docker, 
+   Git, Linux, Streamlit, Pydantic
+5. CS undergrad IIIT Kota — GNNs and unstructured data 
+   pipelines, production-ready ML, full test coverage
 
 **Relevant contract sections:**
-- contracts.md Section 3.1 (jobs_seen schema — 
-  returned dicts must match this structure)
-- contracts.md Section 3.6 (enumerated source values)
-- contracts.md Section 6.2 (test specifications)
+- contracts.md Section 6.4 (test specifications)
+- agent_project.md Section 5.2 (email content rules)
+- agent_project.md Section 2.3 (sending rules — plain text,
+  unsubscribe line NOT added here, that is sender's job)
 
 **Constraints:**
-- feedparser for RSS parsing (only new dependency)
-- requests + BeautifulSoup for any HTTP (already in stack)
-- No Playwright in this module
-- job_id = SHA-256 hash of url if url exists, 
-  else hash of title + company
-- discovered_at = ISO-8601 UTC string
-- source must be one of: rss_remoteok, rss_wwr, 
-  rss_jobspresso, manual
+- Gemini API key via environment variable GEMINI_API_KEY
+- Use google-generativeai SDK (free tier)
+- No API key hardcoded anywhere
 - All timestamps: datetime.now(timezone.utc).isoformat()
-  NOT datetime.utcnow()
+- New dependency: google-generativeai
 
 ---
 
