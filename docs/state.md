@@ -4,7 +4,7 @@
 
 ---
 
-## Current Module: Module 6 — Reply Tracker
+## Current Module: Module 7 — GitHub Actions workflow
 
 ## Completed Modules:
 - [x] Module 0: SQLite schema + tests
@@ -13,8 +13,16 @@
 - [x] Module 3: SMTP sender + summary email
 - [x] Module 4: Finder waterfall + role match
 - [x] Module 5: MiniLM ranker
-- [ ] Module 6: Reply tracker
+- [x] Module 6: Reply tracker
 - [ ] Module 7: GitHub Actions workflow
+
+## Module 6 Results:
+- `src/tracker/imap.py`: inbox polling, bounce detection, opt-out detection, bounced-email extraction, reply matching, and bounce-rate circuit breaker flag
+- `src/tracker/classifier.py`: Gemini-first reply classifier with keyword fallback
+- `src/tracker/__init__.py`: empty package marker
+- `tests/test_tracker.py`: 8 tests aligned to contracts.md Section 6.6
+- Tracker tests passing: 8/8
+- Full suite passing: 54/54
 
 ## Module 5 Results:
 - `src/ranker/minilm.py`: model loader, resume embedding, job ranking, top-N selection
@@ -91,6 +99,9 @@
 - `src/finder/waterfall.py`
 - `src/ranker/__init__.py`
 - `src/ranker/minilm.py`
+- `src/tracker/__init__.py`
+- `src/tracker/imap.py`
+- `src/tracker/classifier.py`
 - `data/manual_queue.json`
 - `tests/__init__.py`
 - `tests/test_db.py`
@@ -99,6 +110,7 @@
 - `tests/test_sender.py`
 - `tests/test_finder.py`
 - `tests/test_ranker.py`
+- `tests/test_tracker.py`
 
 ## Session Log:
 | Date       | Session # | What Was Done                          | What Remains                    |
@@ -109,6 +121,7 @@
 | 2026-03-25 | 4         | Module 3: SMTP sender + 15/15 tests   | Module 4: Finder waterfall      |
 | 2026-03-27 | 5         | Module 4: Finder waterfall + 7/7 tests| Module 5: MiniLM ranker         |
 | 2026-03-27 | 6         | Module 5: MiniLM ranker + 5/5 tests   | Module 6: Reply tracker         |
+| 2026-03-27 | 7         | Module 6: Reply tracker + 8/8 tests   | Module 7: GitHub Actions workflow |
 
 ---
 
