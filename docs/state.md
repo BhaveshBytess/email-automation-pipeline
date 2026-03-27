@@ -1,20 +1,37 @@
 # state.md — Current System State
 
-**Last Updated:** 2026-03-25
+**Last Updated:** 2026-03-27
 
 ---
 
-## Current Module: Module 4 — Finder Waterfall
+## Current Module: Module 6 — Reply Tracker
 
 ## Completed Modules:
 - [x] Module 0: SQLite schema + tests
 - [x] Module 1: RSS scraper + manual queue
 - [x] Module 2: Gemini writer + fallback templates
 - [x] Module 3: SMTP sender + summary email
-- [ ] Module 4: Finder waterfall + role match
-- [ ] Module 5: MiniLM ranker
+- [x] Module 4: Finder waterfall + role match
+- [x] Module 5: MiniLM ranker
 - [ ] Module 6: Reply tracker
 - [ ] Module 7: GitHub Actions workflow
+
+## Module 5 Results:
+- `src/ranker/minilm.py`: model loader, resume embedding, job ranking, top-N selection
+- `src/ranker/__init__.py`: empty package marker
+- `tests/test_ranker.py`: 5 tests with fully mocked model encoding (no real model load)
+- Added dependency: `sentence-transformers`
+- Ranker tests passing: 5/5
+- Full suite passing: 46/46
+
+## Module 4 Results:
+- `src/finder/role_match.py`: name-first role matcher with ROLE_PRIORITY and local context scan around each name
+- `src/finder/waterfall.py`: 5-level finder waterfall (team pages, GitHub, DuckDuckGo, permutations, Gravatar/default pattern)
+- `src/finder/__init__.py`: empty package marker
+- `tests/test_finder.py`: 7 tests aligned to contracts.md Section 6.3
+- Priority behavior verified: CTO preferred over Co-founder when both are present
+- Module tests passing: 7/7
+- Full suite passing: 41/41
 
 ## Module 0 Results:
 - All 5 tables created per contracts.md Section 3
@@ -69,12 +86,19 @@
 - `src/writer/fallback.py`
 - `src/sender/__init__.py`
 - `src/sender/smtp.py`
+- `src/finder/__init__.py`
+- `src/finder/role_match.py`
+- `src/finder/waterfall.py`
+- `src/ranker/__init__.py`
+- `src/ranker/minilm.py`
 - `data/manual_queue.json`
 - `tests/__init__.py`
 - `tests/test_db.py`
 - `tests/test_scraper.py`
 - `tests/test_writer.py`
 - `tests/test_sender.py`
+- `tests/test_finder.py`
+- `tests/test_ranker.py`
 
 ## Session Log:
 | Date       | Session # | What Was Done                          | What Remains                    |
@@ -83,6 +107,8 @@
 | 2026-03-25 | 2         | Module 1: RSS scraper + 5/5 tests     | Module 2: Gemini writer         |
 | 2026-03-25 | 3         | Module 2: Gemini writer + 6/6 tests   | Module 3: SMTP sender           |
 | 2026-03-25 | 4         | Module 3: SMTP sender + 15/15 tests   | Module 4: Finder waterfall      |
+| 2026-03-27 | 5         | Module 4: Finder waterfall + 7/7 tests| Module 5: MiniLM ranker         |
+| 2026-03-27 | 6         | Module 5: MiniLM ranker + 5/5 tests   | Module 6: Reply tracker         |
 
 ---
 
