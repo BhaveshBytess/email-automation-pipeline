@@ -1,0 +1,9 @@
+feedparser
+requests
+beautifulsoup4
+spacy
+sentence-transformers
+google-generativeai
+gspread
+google-auth
+python-dotenv

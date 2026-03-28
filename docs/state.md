@@ -4,7 +4,7 @@
 
 ---
 
-## Current Module: Module 7 — GitHub Actions workflow
+## Current Module: Module 7 — GitHub Actions workflow (Completed)
 
 ## Completed Modules:
 - [x] Module 0: SQLite schema + tests
@@ -14,7 +14,13 @@
 - [x] Module 4: Finder waterfall + role match
 - [x] Module 5: MiniLM ranker
 - [x] Module 6: Reply tracker
-- [ ] Module 7: GitHub Actions workflow
+- [x] Module 7: GitHub Actions workflow
+
+## Module 7 Results:
+- `main.py`: end-to-end pipeline entrypoint wired to contracts.md Section 4 flow with graceful degradation
+- `.github/workflows/daily.yml`: weekday cron workflow with weekend exit, jitter, caching, cache-miss-only spaCy download, and state DB commit/push
+- `requirements.txt`: pinned project dependency manifest for workflow installs
+- Full suite passing after integration: 54/54
 
 ## Module 6 Results:
 - `src/tracker/imap.py`: inbox polling, bounce detection, opt-out detection, bounced-email extraction, reply matching, and bounce-rate circuit breaker flag
@@ -102,6 +108,9 @@
 - `src/tracker/__init__.py`
 - `src/tracker/imap.py`
 - `src/tracker/classifier.py`
+- `main.py`
+- `.github/workflows/daily.yml`
+- `requirements.txt`
 - `data/manual_queue.json`
 - `tests/__init__.py`
 - `tests/test_db.py`
@@ -122,6 +131,7 @@
 | 2026-03-27 | 5         | Module 4: Finder waterfall + 7/7 tests| Module 5: MiniLM ranker         |
 | 2026-03-27 | 6         | Module 5: MiniLM ranker + 5/5 tests   | Module 6: Reply tracker         |
 | 2026-03-27 | 7         | Module 6: Reply tracker + 8/8 tests   | Module 7: GitHub Actions workflow |
+| 2026-03-28 | 8         | Module 7: main.py + daily workflow    | Automation live                 |
 
 ---
 

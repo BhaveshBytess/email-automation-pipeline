@@ -1,0 +1,78 @@
+name: Daily Pipeline
+
+on:
+  schedule:
+    - cron: '30 3 * * 1-5'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  run-pipeline:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Skip Weekend Runs
+        shell: bash
+        run: |
+          DOW=$(date -u +%u)
+          if [ "$DOW" -ge 6 ]; then
+            echo "Weekend detected, exiting successfully."
+            exit 0
+          fi
+
+      - name: Random Jitter (0-45 min)
+        shell: bash
+        run: |
+          MINUTES=$((RANDOM % 45))
+          echo "Sleeping for ${MINUTES} minutes to add schedule jitter"
+          sleep "${MINUTES}m"
+
+      - name: Setup Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Cache Dependencies and Models
+        id: cache-deps
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/pip
+            ~/.cache/huggingface/hub
+            ~/.cache/spacy
+          key: deps-${{ runner.os }}-${{ hashFiles('requirements.txt') }}
+          restore-keys: |
+            deps-${{ runner.os }}-
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Download spaCy Model (cache miss only)
+        if: steps.cache-deps.outputs.cache-hit != 'true'
+        run: python -m spacy download en_core_web_sm
+
+      - name: Run Daily Pipeline
+        env:
+          OUTREACH_EMAIL: ${{ secrets.OUTREACH_EMAIL }}
+          OUTREACH_APP_PASSWORD: ${{ secrets.OUTREACH_APP_PASSWORD }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python main.py
+
+      - name: Commit state.db Changes
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add db/state.db
+          git diff --staged --quiet || git commit -m "chore(state): update state.db [skip ci]"
+          git push
