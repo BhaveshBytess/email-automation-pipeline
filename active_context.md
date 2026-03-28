@@ -45,71 +45,107 @@ SQLite state. 5 emails/day max.
 
 [EDIT THIS SECTION BEFORE EACH SESSION]
 
-**Task:** Build Module 3 — Gmail SMTP Sender
+**Task:** Build Module 7 — GitHub Actions Workflow
 
 **What exists:**
-- src/db/schema.py — 17 helper functions, 8/8 tests
-- src/scraper/rss.py + manual.py — 5/5 tests
-- src/writer/gemini.py + fallback.py — 6/6 tests
-- Full suite: 19/19 passing
+- src/db/schema.py — 8/8 tests passing
+- src/scraper/rss.py + manual.py — 5/5 tests passing
+- src/writer/gemini.py + fallback.py — 6/6 tests passing
+- src/sender/smtp.py — 15/15 tests passing
+- src/finder/role_match.py + waterfall.py — 7/7 tests passing
+- src/ranker/minilm.py — 5/5 tests passing
+- src/tracker/imap.py + classifier.py — 8/8 tests passing
+- Full suite: 54/54 passing
+- All modules complete and pushed to main
 
 **What needs to happen this session:**
-- Create src/sender/smtp.py:
-  - `should_skip_today() -> bool`
-    True on Saturday and Sunday
-  - `get_warmup_limit(first_send_date: date) -> int`
-    wk1-2=1, wk3-4=2, wk5-6=3, wk7+=5
-  - `send_email(to_addr, subject, body, 
-    from_addr, app_password) -> bool`
-    Plain text only. Appends unsubscribe line.
-    Returns True on success, False on failure.
-  - `process_queue(db_conn, daily_limit) -> dict`
-    Pulls from email_queue WHERE status='pending'
-    ORDER BY relevance_score DESC
-    Sends up to daily_limit, returns stats dict:
-    {sent, failed, skipped}
-  - `send_follow_ups(db_conn) -> dict`
-    Processes follow_ups_due BEFORE new emails
-    Hardcoded template — NO Gemini call
-    Returns {sent, skipped}
-  - `send_summary(stats: dict, 
-    to_primary: str, from_addr: str, 
-    app_password: str) -> None`
-    Sends daily heartbeat to primary Gmail
-    Sent even if zero emails were sent
-    Never crashes pipeline if it fails
+- Create main.py in project root:
+  Entry point that wires all modules together
+  in correct data flow order per contracts.md
+  Section 4:
 
-- Create src/sender/__init__.py — empty package marker
+  1. backup_db()
+  2. should_skip_today() → exit 0 if weekend
+  3. fetch_all_rss() + load_manual_queue()
+  4. merge_and_deduplicate()
+  5. rank_jobs() → select_top_n(n=25)
+  6. for each job → find_contact()
+  7. generate_email() → insert_queue()
+  8. check_inbox() → process replies/bounces
+  9. send_follow_ups()
+  10. process_queue(daily_limit)
+  11. send_summary(stats)
+  12. commit state.db back to repo
 
-- Create tests/test_sender.py with tests per
-  contracts.md Section 6.5
+  Graceful degradation at every step:
+  log error and continue, never crash
 
-**Implementation rules (non-negotiable):**
-- Unsubscribe line appended to EVERY outgoing body:
-  P.S. Not relevant? Reply "stop" and I'll make 
-  sure you never hear from me again.
-- Follow-ups processed BEFORE new emails
-- Summary sent even if nothing was sent today
-- SMTP credentials via env vars:
-  OUTREACH_EMAIL and OUTREACH_APP_PASSWORD
-- No credentials hardcoded anywhere
-- All timestamps: datetime.now(timezone.utc).isoformat()
-  NOT datetime.utcnow()
+- Create .github/workflows/daily.yml:
+  Cron: '30 3 * * 1-5'
+  (3:30 AM UTC = ~9 AM IST, weekdays only)
+
+  Jobs:
+  - Random jitter: sleep $((RANDOM % 45))m
+  - Checkout repo (with full git history
+    so state.db commit works)
+  - Setup Python 3.11
+  - Cache dependencies:
+    ~/.cache/pip
+    ~/.cache/huggingface/hub
+    key: deps-${{ hashFiles('requirements.txt') }}
+  - pip install -r requirements.txt
+  - python main.py
+  - Commit state.db back to repo if changed
+
+- Create requirements.txt with all dependencies:
+  feedparser
+  requests
+  beautifulsoup4
+  spacy
+  sentence-transformers
+  google-generativeai
+  gspread
+  google-auth
+  python-dotenv
+
+**Environment variables (GitHub Actions secrets):**
+  OUTREACH_EMAIL
+  OUTREACH_APP_PASSWORD
+  GEMINI_API_KEY
+  GITHUB_TOKEN (auto-provided by Actions)
 
 **Relevant contract sections:**
-- contracts.md Section 6.5 (test specifications)
-- contracts.md Section 4 (data flow — sender pulls 
-  from email_queue, moves to companies_contacted)
-- contracts.md FC-04 (SMTP failure contract)
-- agent_project.md Section 2.3 (sending rules)
+- contracts.md Section 4 (data flow — order is law)
+- contracts.md FC-03 (zero scraper results → 
+  process manual queue only, never crash)
+- contracts.md FC-04 (SMTP fail → queue stays
+  pending, log error)
+- contracts.md FC-06 (GitHub Actions budget —
+  log warning at 80%, skip scraping at 90%)
+- contracts.md FC-07 (bounce rate > 5% →
+  pause sending, alert in summary)
+- agent_project.md Section 7 (GitHub Actions
+  constraints — caching, jitter, state.db commit)
+- decisions.md D010 (GitHub Actions as runtime)
 
 **Constraints:**
-- smtplib + imaplib — stdlib only, no new dependencies
-- Plain text emails only, no HTML
-- Weekend skip must be tested with mocked datetime
-- Warmup limit must be tested per week number
-- Queue processing must respect daily limit
-
+- No new dependencies in main.py
+- All secrets via os.environ — never hardcoded
+- state.db committed back after every run
+- state.db.backup created before run starts
+- Weekend skip is first check in daily.yml
+  (exit 0 immediately, burn zero minutes)
+- Jitter applied before any work starts
+- Dependency cache must be used — no re-download
+  of 80MB MiniLM model every run
+- spaCy model download in workflow:
+  python -m spacy download en_core_web_sm
+  (cache this too)
+- main.py must run cleanly with zero emails
+  sent on first run (empty queue is valid)
+- Summary email sent at end of every run
+  including runs with zero activity
+  
 ---
 
 ## Session Rules

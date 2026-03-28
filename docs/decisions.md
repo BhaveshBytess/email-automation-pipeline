@@ -185,7 +185,49 @@ Finder waterfall gets domain directly.
 
 ---
 
+## D013: Role Match Context Window Tightened to ~100 chars
+**Date:** 2026-03-27
+**Context:** Initial implementation had overly large context 
+window per name — a role keyword near a different person's 
+name could be incorrectly associated. Also, first match was 
+returned instead of globally highest priority role.
+**Decision:** Tighten per-name context span to ~100 chars 
+total. Scan all names first, collect all role matches, then 
+return the highest priority result globally.
+**Consequence:** More accurate role association on busy team 
+pages with multiple people and role mentions.
+**Status:** Accepted
+
 ---
+
+## D014: Bounce Rate Circuit Breaker at 5% (FC-07)
+**Date:** 2026-03-27
+**Context:** Sending to bounced addresses damages Gmail 
+sender reputation permanently. Need an automatic stop 
+mechanism before reputation is impacted.
+**Decision:** After each inbox check, calculate bounce 
+rate over last 7 days. If > 5%, set bounce_rate_exceeded 
+flag in stats dict. Sender checks flag before processing 
+queue.
+**Consequence:** Pipeline pauses automatically on high 
+bounce rate. Requires manual investigation before resuming.
+**Status:** Accepted
+
+---
+
+## D015: [skip ci] Tag on state.db Commits
+**Date:** 2026-03-27
+**Context:** GitHub Actions commits state.db back to repo 
+after every run. Without [skip ci], that commit triggers 
+another workflow run — infinite loop burning free minutes.
+**Decision:** All state.db commits use message suffix 
+[skip ci] to prevent re-triggering the workflow.
+**Consequence:** State commits are invisible to CI. 
+Correct behavior.
+**Status:** Accepted
+
+---
+
 ## Template For New Decisions
 
 ## DXXX: [Title]
