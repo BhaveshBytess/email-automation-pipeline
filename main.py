@@ -14,6 +14,8 @@ from pathlib import Path
 from typing import Any
 from urllib.parse import urlparse
 
+from dotenv import load_dotenv
+
 from src.db.schema import (
     backup_db,
     init_db,
@@ -37,6 +39,8 @@ logging.basicConfig(
     format="%(asctime)s %(levelname)s %(name)s: %(message)s",
 )
 logger = logging.getLogger(__name__)
+
+load_dotenv()
 
 DB_PATH = Path("db/state.db")
 MANUAL_QUEUE_PATH = Path("data/manual_queue.json")

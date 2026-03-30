@@ -29,6 +29,7 @@
 	- `wubble.ai`
 	- `adtpl.net`
 - Workflow hardening: `.github/workflows/daily.yml` now checks `spacy.load("en_core_web_sm")` and downloads model only when missing, preventing runtime finder crashes from missing spaCy model.
+- Local runtime hardening: `main.py` now loads `.env` via `python-dotenv`; `.gitignore` excludes `.env` files to avoid accidental credential commits.
 
 ## Module 6 Results:
 - `src/tracker/imap.py`: inbox polling, bounce detection, opt-out detection, bounced-email extraction, reply matching, and bounce-rate circuit breaker flag
