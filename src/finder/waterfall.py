@@ -124,7 +124,17 @@ def check_gravatar(email: str) -> bool:
 # L1 — Team-page scraping
 # ---------------------------------------------------------------------------
 
-_TEAM_PATHS = ["/about", "/team", "/leadership", "/people"]
+_TEAM_PATHS = [
+    "",
+    "/about",
+    "/team",
+    "/leadership",
+    "/people",
+    "/company",
+    "/about-us",
+    "/careers",
+    "/contact",
+]
 
 
 def _scrape_team_pages(
@@ -152,6 +162,12 @@ def _scrape_team_pages(
 
         match = find_technical_lead(page_text, names)
         if match is None:
+            logger.info(
+                "L1 role miss: domain=%s path=%s names_extracted=%d",
+                domain,
+                path or "/",
+                len(names),
+            )
             continue
 
         name, title = match

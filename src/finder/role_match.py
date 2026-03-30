@@ -24,9 +24,25 @@ ROLE_PRIORITY: list[str] = [
     "Chief Technolog",        # matches Chief Technology Officer / Chief Technologist
     "VP Eng",                 # matches VP Engineering / VP Eng
     "Head of Eng",            # matches Head of Engineering
+    "Director of Eng",
+    "Engineering Manager",
+    "Founding Engineer",
     "Technical Co-founder",
     "Co-founder",
+    "Founder",
+    "Staff Engineer",
+    "Senior Engineer",
+    "Software Engineer",
+    "Product Engineer",
+    "Platform Engineer",
+    "Full Stack Engineer",
     "Tech Lead",
+    "Technical Recruiter",
+    "Talent Acquisition",
+    "Talent Partner",
+    "People Ops",
+    "Recruiter",
+    "Hiring Manager",
 ]
 
 _WINDOW = 50  # chars each side; ~100 chars total around a name mention

@@ -1,6 +1,6 @@
 # state.md — Current System State
 
-**Last Updated:** 2026-03-30
+**Last Updated:** 2026-03-31
 
 ---
 
@@ -30,6 +30,8 @@
 	- `adtpl.net`
 - Workflow hardening: `.github/workflows/daily.yml` now checks `spacy.load("en_core_web_sm")` and downloads model only when missing, preventing runtime finder crashes from missing spaCy model.
 - Local runtime hardening: `main.py` now loads `.env` via `python-dotenv`; `.gitignore` excludes `.env` files to avoid accidental credential commits.
+- Finder refinement pass: expanded role-title matching coverage (`Founder`, `Founding Engineer`, recruiter/talent variants, broader engineering titles) and expanded low-cost team-page probing paths (`/company`, `/about-us`, `/careers`, `/contact`, homepage) to reduce `no_role_match` bottleneck.
+- Test status after refinement: finder tests 10/10, full suite 57/57.
 
 ## Module 6 Results:
 - `src/tracker/imap.py`: inbox polling, bounce detection, opt-out detection, bounced-email extraction, reply matching, and bounce-rate circuit breaker flag
@@ -142,6 +144,7 @@
 | 2026-03-27 | 7         | Module 6: Reply tracker + 8/8 tests   | Module 7: GitHub Actions workflow |
 | 2026-03-28 | 8         | Module 7: main.py + daily workflow    | Automation live                 |
 | 2026-03-30 | 9         | Added 4 manual queue company entries  | Next run should attempt finder on real company domains |
+| 2026-03-31 | 10        | Finder yield refinement + tests 57/57 | Re-run pipeline and verify first sends |
 
 ---
 

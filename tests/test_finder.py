@@ -93,6 +93,42 @@ def test_role_match_priority():
     assert title == "CTO"
 
 
+def test_role_match_founding_engineer():
+    text = (
+        "Team page. "
+        "Ravi Shah is our Founding Engineer and leads core platform architecture."
+    )
+    names = ["Ravi Shah"]
+    result = find_technical_lead(text, names)
+    assert result is not None
+    assert result[0] == "Ravi Shah"
+    assert result[1] == "Founding Engineer"
+
+
+def test_role_match_recruiter_fallback():
+    text = (
+        "Careers. "
+        "Mia Chen is the Technical Recruiter for engineering hiring."
+    )
+    names = ["Mia Chen"]
+    result = find_technical_lead(text, names)
+    assert result is not None
+    assert result[0] == "Mia Chen"
+    assert result[1] == "Technical Recruiter"
+
+
+def test_role_match_founder_fallback():
+    text = (
+        "Company page. "
+        "Arjun Patel, Founder, is actively building product with the team."
+    )
+    names = ["Arjun Patel"]
+    result = find_technical_lead(text, names)
+    assert result is not None
+    assert result[0] == "Arjun Patel"
+    assert result[1] == "Founder"
+
+
 # -----------------------------------------------------------------------
 # 5. Email permutation generator
 # -----------------------------------------------------------------------
