@@ -1,6 +1,6 @@
 # state.md — Current System State
 
-**Last Updated:** 2026-03-27
+**Last Updated:** 2026-03-30
 
 ---
 
@@ -21,6 +21,13 @@
 - `.github/workflows/daily.yml`: weekday cron workflow with weekend exit, jitter, caching, cache-miss-only spaCy download, and state DB commit/push
 - `requirements.txt`: pinned project dependency manifest for workflow installs
 - Full suite passing after integration: 54/54
+
+## Operational Updates:
+- `data/manual_queue.json` populated with 4 curated entries using verified company domains:
+	- `unque.me`
+	- `wtfox.ai`
+	- `wubble.ai`
+	- `adtpl.net`
 
 ## Module 6 Results:
 - `src/tracker/imap.py`: inbox polling, bounce detection, opt-out detection, bounced-email extraction, reply matching, and bounce-rate circuit breaker flag
@@ -132,6 +139,7 @@
 | 2026-03-27 | 6         | Module 5: MiniLM ranker + 5/5 tests   | Module 6: Reply tracker         |
 | 2026-03-27 | 7         | Module 6: Reply tracker + 8/8 tests   | Module 7: GitHub Actions workflow |
 | 2026-03-28 | 8         | Module 7: main.py + daily workflow    | Automation live                 |
+| 2026-03-30 | 9         | Added 4 manual queue company entries  | Next run should attempt finder on real company domains |
 
 ---
 

@@ -1,1 +1,30 @@
-[]
+[
+	{
+		"company": "UnQue",
+		"domain": "unque.me",
+		"title": "Software Engineering Intern",
+		"url": "https://unque.me/",
+		"jd_summary": "Software engineering internship for a mobile-first business platform serving local service businesses. Focus areas likely include product features, backend workflows, and booking/payments-related engineering." 
+	},
+	{
+		"company": "WTFox AI",
+		"domain": "wtfox.ai",
+		"title": "Software Developer Intern",
+		"url": "https://www.wtfox.ai/",
+		"jd_summary": "Software developer internship at an AI CRM product for automotive and retail distributors. Role likely involves CRM automation features, integrations, and conversational-data workflow engineering." 
+	},
+	{
+		"company": "Wubble AI",
+		"domain": "wubble.ai",
+		"title": "AI/ML Intern",
+		"url": "https://www.wubble.ai/",
+		"jd_summary": "AI/ML internship for an AI audio generation platform covering music, voice, and SFX workflows. Work likely includes applied ML features, model-powered product capabilities, and production AI integration." 
+	},
+	{
+		"company": "Atomicdot Technologies",
+		"domain": "adtpl.net",
+		"title": "AI Engineer",
+		"url": "https://adtpl.net/",
+		"jd_summary": "AI engineering role at an AI-native consumer internet product company. Focus likely includes building AI-first product features, model-backed experiences, and scalable production systems." 
+	}
+]
