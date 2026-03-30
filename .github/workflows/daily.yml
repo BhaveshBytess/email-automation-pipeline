@@ -28,6 +28,7 @@ jobs:
           fi
 
       - name: Random Jitter (0-45 min)
+        if: github.event_name == 'schedule'
         shell: bash
         run: |
           MINUTES=$((RANDOM % 45))
@@ -74,6 +75,10 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
+          if [ ! -f db/state.db ]; then
+            echo "db/state.db not found; skipping commit step"
+            exit 0
+          fi
           git add db/state.db
           git diff --staged --quiet || git commit -m "chore(state): update state.db [skip ci]"
           git push
