@@ -65,6 +65,7 @@ jobs:
           OUTREACH_EMAIL: ${{ secrets.OUTREACH_EMAIL }}
           OUTREACH_APP_PASSWORD: ${{ secrets.OUTREACH_APP_PASSWORD }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          PRIMARY_EMAIL: ${{ secrets.PRIMARY_EMAIL }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: python main.py
 
