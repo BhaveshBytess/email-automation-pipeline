@@ -237,6 +237,15 @@ Correct behavior.
 
 ---
 
+## D017: Block Default-Pattern Email Sends By Default
+**Date:** 2026-03-31
+**Context:** A permutation-derived `default_pattern` address (`sarah@wtfox.ai`) bounced with `550 5.1.1`, confirming high false-positive risk for unverified guessed emails.
+**Decision:** Do not send contacts when finder confidence is `default_pattern` unless operator explicitly enables `ALLOW_DEFAULT_PATTERN_SEND=true`. Log such cases to `email_not_found` with reason `verification_failed`.
+**Consequence:** Short-term send volume may drop, but bounce risk and sender reputation damage are significantly reduced. Recovery runs remain possible through explicit override.
+**Status:** Accepted
+
+---
+
 ## Template For New Decisions
 
 ## DXXX: [Title]

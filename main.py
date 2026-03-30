@@ -288,6 +288,7 @@ def main() -> int:
                 run_stats["errors"] += 1
 
         force_manual_retry = _safe_bool_env("FORCE_MANUAL_RETRY", default=False)
+        allow_default_pattern_send = _safe_bool_env("ALLOW_DEFAULT_PATTERN_SEND", default=False)
         retry_manual_jobs = _manual_retry_candidates(
             manual_jobs=manual_jobs,
             selected_jobs=selected_jobs,
@@ -352,6 +353,25 @@ def main() -> int:
                     )
                 except Exception:
                     logger.exception("insert_not_found failed for %s", domain)
+                    run_stats["errors"] += 1
+                continue
+
+            # Guardrail: default-pattern permutations are high bounce risk.
+            # Keep them blocked unless explicitly enabled for experiments.
+            if contact.get("confidence") == "default_pattern" and not allow_default_pattern_send:
+                logger.info("Skipping low-confidence guessed email for %s", domain)
+                try:
+                    insert_not_found(
+                        db_conn,
+                        {
+                            "company": company,
+                            "domain": domain,
+                            "job_id": job.get("job_id"),
+                            "reason": "verification_failed",
+                        },
+                    )
+                except Exception:
+                    logger.exception("insert_not_found failed for low-confidence %s", domain)
                     run_stats["errors"] += 1
                 continue
 

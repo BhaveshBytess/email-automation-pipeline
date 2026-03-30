@@ -23,6 +23,8 @@
 - Full suite passing after integration: 54/54
 
 ## Operational Updates:
+- Delivery quality safeguard added in `main.py`: emails with finder confidence `default_pattern` are now blocked by default and logged as `verification_failed`; override is explicit via `ALLOW_DEFAULT_PATTERN_SEND=true`.
+- Bounce processing validated end-to-end: Gmail hard bounce for `sarah@wtfox.ai` was detected by tracker, contact marked `bounced=1`, and FC-07 bounce-rate circuit breaker paused further sending automatically.
 - Runtime contract enforcement added in `main.py`: sender/finder path now applies `is_company_contacted` (60-day block) and `is_email_not_found` (30-day retry block) before contact discovery, preventing accidental re-contacts when old records are revisited.
 - Manual retry recovery path added: manual queue entries can be re-attempted even if already in `jobs_seen` through controlled selection; `FORCE_MANUAL_RETRY=true` allows one-off override of `email_not_found` retry gate for deliberate recovery runs.
 - Local run recovery completed: installed missing local NLP dependencies (`spacy`, `en_core_web_sm`) and re-ran with manual retry override.
@@ -150,6 +152,7 @@
 | 2026-03-30 | 9         | Added 4 manual queue company entries  | Next run should attempt finder on real company domains |
 | 2026-03-31 | 10        | Finder yield refinement + tests 57/57 | Re-run pipeline and verify first sends |
 | 2026-03-31 | 11        | Runtime dedupe gating + manual retry path; first local send confirmed | Continue improving finder hit-rate for remaining manual domains |
+| 2026-03-31 | 12        | Blocked default-pattern sends; bounce detected and circuit breaker triggered | Improve direct-find confidence to safely resume sending |
 
 ---
 
@@ -157,6 +160,6 @@
 - Total emails sent: 1
 - Total replies: 0
 - Reply rate: 0.0%
-- Bounce rate: 0.0%
+- Bounce rate: 100.0% (sample size: 1)
 - Opt-out rate: N/A
 - Best performing subject variant: 1 (current sample size: 1)
