@@ -57,9 +57,21 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Download spaCy Model (cache miss only)
-        if: steps.cache-deps.outputs.cache-hit != 'true'
-        run: python -m spacy download en_core_web_sm
+      - name: Ensure spaCy Model Available
+        run: |
+          python - <<'PY'
+          import subprocess
+          import sys
+
+          import spacy
+
+          try:
+              spacy.load("en_core_web_sm")
+              print("en_core_web_sm already available")
+          except Exception:
+              print("en_core_web_sm missing; downloading")
+              subprocess.check_call([sys.executable, "-m", "spacy", "download", "en_core_web_sm"])
+          PY
 
       - name: Run Daily Pipeline
         env:
