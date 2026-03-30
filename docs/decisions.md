@@ -246,6 +246,15 @@ Correct behavior.
 
 ---
 
+## D018: Default Gemini Model Switched to gemini-2.5-flash
+**Date:** 2026-03-31
+**Context:** Runtime tests with the current API key show `gemini-2.0-flash` returns `429 ResourceExhausted` with free-tier quota limits at 0, while `gemini-2.5-flash` successfully serves generation requests.
+**Decision:** Make model selectable via `GEMINI_MODEL` and set default to `gemini-2.5-flash` in writer code.
+**Consequence:** Writer stays operational with current key settings while retaining a one-variable switch for future quota/model changes.
+**Status:** Accepted
+
+---
+
 ## Template For New Decisions
 
 ## DXXX: [Title]
