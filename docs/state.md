@@ -23,6 +23,11 @@
 - Full suite passing after integration: 54/54
 
 ## Operational Updates:
+- Finder L1 email extraction strengthened in `src/finder/waterfall.py`:
+	- now parses `mailto:` links directly from HTML,
+	- now decodes common obfuscated patterns like `[at]` and `[dot]`,
+	- normalizes and deduplicates extracted addresses before selection.
+- Finder tests expanded with obfuscated-email and mailto extraction coverage; full suite now 59/59 passing.
 - Gemini model selection is now configurable via `GEMINI_MODEL`; default switched to `gemini-2.5-flash` because current key is quota-blocked on `gemini-2.0-flash` but works on `gemini-2.5-flash`.
 - Delivery quality safeguard added in `main.py`: emails with finder confidence `default_pattern` are now blocked by default and logged as `verification_failed`; override is explicit via `ALLOW_DEFAULT_PATTERN_SEND=true`.
 - Bounce processing validated end-to-end: Gmail hard bounce for `sarah@wtfox.ai` was detected by tracker, contact marked `bounced=1`, and FC-07 bounce-rate circuit breaker paused further sending automatically.
@@ -155,6 +160,7 @@
 | 2026-03-31 | 11        | Runtime dedupe gating + manual retry path; first local send confirmed | Continue improving finder hit-rate for remaining manual domains |
 | 2026-03-31 | 12        | Blocked default-pattern sends; bounce detected and circuit breaker triggered | Improve direct-find confidence to safely resume sending |
 | 2026-03-31 | 13        | Gemini key validation: 2.5-flash works, 2.0-flash quota-blocked; writer default updated | Monitor quota stability and migrate SDK when ready |
+| 2026-03-31 | 14        | Finder email extraction upgraded (mailto + obfuscation), tests expanded | Re-run target domains to measure direct-find lift |
 
 ---
 

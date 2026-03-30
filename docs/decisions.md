@@ -255,6 +255,15 @@ Correct behavior.
 
 ---
 
+## D019: Prefer On-Page Email Signals Over Guessing
+**Date:** 2026-03-31
+**Context:** Real company pages often expose addresses through `mailto:` links or simple obfuscation (`[at]`, `[dot]`). Missing these signals lowers direct-find success and pushes the system toward risky guessed addresses.
+**Decision:** Extend L1 finder extraction to include `mailto:` parsing from raw HTML and obfuscated email normalization before regex matching.
+**Consequence:** Higher chance of obtaining direct evidence-based emails without relaxing bounce-protection policies.
+**Status:** Accepted
+
+---
+
 ## Template For New Decisions
 
 ## DXXX: [Title]

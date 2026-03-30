@@ -25,6 +25,7 @@ import os
 import random
 import re
 import time
+from html import unescape
 from datetime import datetime, timezone
 from typing import Optional
 
@@ -57,6 +58,7 @@ def _get_nlp():
 # ---------------------------------------------------------------------------
 
 _EMAIL_RE = re.compile(r"[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+")
+_MAILTO_RE = re.compile(r"mailto:([^\?\"'\s>]+)", flags=re.IGNORECASE)
 
 _HEADERS = {
     "User-Agent": (
@@ -75,8 +77,63 @@ def _extract_names(text: str) -> list[str]:
 
 
 def _find_emails_on_page(text: str) -> list[str]:
-    """Return all email-like strings found in *text*."""
-    return _EMAIL_RE.findall(text)
+    """Return deduplicated email-like strings from plain/obfuscated text."""
+    candidates = _EMAIL_RE.findall(text)
+
+    # Normalize common obfuscations like "name [at] company [dot] com".
+    normalized = unescape(text)
+    normalized = re.sub(
+        r"(\[\s*at\s*\]|\(\s*at\s*\)|\{\s*at\s*\})",
+        "@",
+        normalized,
+        flags=re.IGNORECASE,
+    )
+    normalized = re.sub(
+        r"(\[\s*dot\s*\]|\(\s*dot\s*\)|\{\s*dot\s*\})",
+        ".",
+        normalized,
+        flags=re.IGNORECASE,
+    )
+    normalized = re.sub(r"\s*@\s*", "@", normalized)
+    normalized = re.sub(r"\s*\.\s*", ".", normalized)
+    candidates.extend(_EMAIL_RE.findall(normalized))
+
+    cleaned: list[str] = []
+    seen: set[str] = set()
+    for email in candidates:
+        e = email.strip().strip(".,;:()[]{}<>").lower()
+        if e.count("@") != 1:
+            continue
+        local, domain = e.split("@", 1)
+        if not local or "." not in domain:
+            continue
+        if e in seen:
+            continue
+        seen.add(e)
+        cleaned.append(e)
+
+    return cleaned
+
+
+def _find_mailto_emails(html: str) -> list[str]:
+    """Extract email addresses from mailto links in HTML."""
+    if not html:
+        return []
+    candidates = [m.strip().lower() for m in _MAILTO_RE.findall(html)]
+    cleaned: list[str] = []
+    seen: set[str] = set()
+    for email in candidates:
+        e = email.strip().strip(".,;:()[]{}<>")
+        if e.count("@") != 1:
+            continue
+        local, domain = e.split("@", 1)
+        if not local or "." not in domain:
+            continue
+        if e in seen:
+            continue
+        seen.add(e)
+        cleaned.append(e)
+    return cleaned
 
 
 # ---------------------------------------------------------------------------
@@ -174,6 +231,11 @@ def _scrape_team_pages(
 
         # Look for an email on the page
         emails = _find_emails_on_page(page_text)
+        mailto_emails = _find_mailto_emails(resp.text)
+        if mailto_emails:
+            for e in mailto_emails:
+                if e not in emails:
+                    emails.append(e)
         # Prefer email containing the person's first name
         first_lower = name.split()[0].lower() if name.split() else ""
         picked = None

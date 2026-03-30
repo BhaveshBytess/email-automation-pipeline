@@ -16,7 +16,12 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from src.finder.role_match import find_technical_lead
-from src.finder.waterfall import check_gravatar, generate_permutations
+from src.finder.waterfall import (
+    check_gravatar,
+    generate_permutations,
+    _find_emails_on_page,
+    _find_mailto_emails,
+)
 
 
 # -----------------------------------------------------------------------
@@ -180,3 +185,15 @@ def test_gravatar_false(mock_get):
 
     assert check_gravatar("random_nonexistent_xyz@example.com") is False
     mock_get.assert_called_once()
+
+
+def test_extract_obfuscated_email_text():
+    text = "Reach me at sarah [at] wtfox [dot] ai for engineering roles."
+    emails = _find_emails_on_page(text)
+    assert "sarah@wtfox.ai" in emails
+
+
+def test_extract_mailto_email_html():
+    html = '<a href="mailto:hello@acme.com?subject=Hi">Email</a>'
+    emails = _find_mailto_emails(html)
+    assert emails == ["hello@acme.com"]
