@@ -23,6 +23,7 @@
 - Full suite passing after integration: 54/54
 
 ## Operational Updates:
+- Controlled retry validation after finder extraction upgrade completed: manual retry candidates (3 domains) still resolved to `no_role_match`, with no new queue entries and no new sends.
 - Finder L1 email extraction strengthened in `src/finder/waterfall.py`:
 	- now parses `mailto:` links directly from HTML,
 	- now decodes common obfuscated patterns like `[at]` and `[dot]`,
@@ -161,6 +162,7 @@
 | 2026-03-31 | 12        | Blocked default-pattern sends; bounce detected and circuit breaker triggered | Improve direct-find confidence to safely resume sending |
 | 2026-03-31 | 13        | Gemini key validation: 2.5-flash works, 2.0-flash quota-blocked; writer default updated | Monitor quota stability and migrate SDK when ready |
 | 2026-03-31 | 14        | Finder email extraction upgraded (mailto + obfuscation), tests expanded | Re-run target domains to measure direct-find lift |
+| 2026-03-31 | 15        | Controlled retry run executed; no new direct finds on remaining 3 manual domains | Improve name discovery signals before next retry |
 
 ---
 
