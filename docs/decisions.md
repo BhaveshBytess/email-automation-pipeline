@@ -228,6 +228,15 @@ Correct behavior.
 
 ---
 
+## D016: Enforce Runtime Dedupe Gates + Controlled Manual Retry Override
+**Date:** 2026-03-31
+**Context:** Pipeline orchestration depended on `jobs_seen` dedupe and did not explicitly enforce the 60-day contact block (`companies_contacted`) or 30-day finder retry block (`email_not_found`) before contact discovery/sending. This allowed policy drift risk and made manual recovery from prior finder misses operationally awkward.
+**Decision:** In `main.py`, enforce `is_company_contacted(domain, 60)` and `is_email_not_found(domain, 30)` as runtime gates before finder/sender execution. Add controlled manual retry selection for manual queue entries already present in `jobs_seen`, with an explicit operator override `FORCE_MANUAL_RETRY=true` for one-off recovery runs.
+**Consequence:** Contract policies are now consistently enforced in execution flow. Manual recovery is possible without schema changes, while unsafe bypass remains explicit and opt-in.
+**Status:** Accepted
+
+---
+
 ## Template For New Decisions
 
 ## DXXX: [Title]

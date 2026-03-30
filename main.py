@@ -23,6 +23,8 @@ from src.db.schema import (
     insert_not_found,
     insert_queue,
     insert_run_log,
+    is_company_contacted,
+    is_email_not_found,
 )
 from src.finder.waterfall import find_contact
 from src.ranker.minilm import DEFAULT_RESUME_TEXT, get_resume_embedding, load_model, rank_jobs, select_top_n
@@ -65,6 +67,55 @@ def _safe_int_env(name: str, default: int) -> int:
     except ValueError:
         logger.warning("Invalid int env %s=%r, using default=%d", name, raw, default)
         return default
+
+
+def _safe_bool_env(name: str, default: bool = False) -> bool:
+    raw = os.environ.get(name, "").strip().lower()
+    if not raw:
+        return default
+    return raw in {"1", "true", "yes", "on"}
+
+
+def _manual_retry_candidates(
+    manual_jobs: list[dict[str, Any]],
+    selected_jobs: list[dict[str, Any]],
+    db_conn,
+    force_retry_not_found: bool,
+) -> list[dict[str, Any]]:
+    """Return manual jobs eligible for a retry pass in this run.
+
+    This keeps contract dedupe protections by default:
+    - block domains contacted in the last 60 days
+    - block domains currently in email_not_found retry window
+   
+    The email_not_found gate can be intentionally bypassed via
+    FORCE_MANUAL_RETRY=true for one-off recovery runs.
+    """
+    selected_job_ids = {
+        str(job.get("job_id"))
+        for job in selected_jobs
+        if job.get("job_id") is not None
+    }
+
+    candidates: list[dict[str, Any]] = []
+    for job in manual_jobs:
+        job_id = str(job.get("job_id", "")).strip()
+        if not job_id or job_id in selected_job_ids:
+            continue
+
+        company = str(job.get("company", "")).strip()
+        domain = str(job.get("domain") or _domain_from_url(str(job.get("url", ""))) or "").strip().lower()
+        if not company or not domain:
+            continue
+
+        if is_company_contacted(db_conn, domain, days=60):
+            continue
+        if not force_retry_not_found and is_email_not_found(db_conn, domain, days=30):
+            continue
+
+        candidates.append(job)
+
+    return candidates
 
 
 def _check_actions_budget() -> dict[str, Any]:
@@ -236,6 +287,22 @@ def main() -> int:
                 logger.exception("ranking/select_top_n failed")
                 run_stats["errors"] += 1
 
+        force_manual_retry = _safe_bool_env("FORCE_MANUAL_RETRY", default=False)
+        retry_manual_jobs = _manual_retry_candidates(
+            manual_jobs=manual_jobs,
+            selected_jobs=selected_jobs,
+            db_conn=db_conn,
+            force_retry_not_found=force_manual_retry,
+        )
+        if retry_manual_jobs:
+            logger.info(
+                "Manual retry candidates selected: %d (force_retry=%s)",
+                len(retry_manual_jobs),
+                force_manual_retry,
+            )
+        selected_jobs.extend(retry_manual_jobs)
+        run_stats["jobs_relevant"] = len(selected_jobs)
+
         # Steps 6 and 7: find_contact() -> generate_email() -> insert_queue()
         for job in selected_jobs:
             company = job.get("company", "").strip()
@@ -255,6 +322,14 @@ def main() -> int:
                 except Exception:
                     logger.exception("insert_not_found failed for missing company/domain")
                     run_stats["errors"] += 1
+                continue
+
+            # Contract gates: avoid re-contacting recent sends and respect retry window.
+            if is_company_contacted(db_conn, domain, days=60):
+                logger.info("Skipping %s: contacted within 60-day window", domain)
+                continue
+            if not force_manual_retry and is_email_not_found(db_conn, domain, days=30):
+                logger.info("Skipping %s: in email_not_found retry window", domain)
                 continue
 
             try:

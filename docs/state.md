@@ -23,6 +23,10 @@
 - Full suite passing after integration: 54/54
 
 ## Operational Updates:
+- Runtime contract enforcement added in `main.py`: sender/finder path now applies `is_company_contacted` (60-day block) and `is_email_not_found` (30-day retry block) before contact discovery, preventing accidental re-contacts when old records are revisited.
+- Manual retry recovery path added: manual queue entries can be re-attempted even if already in `jobs_seen` through controlled selection; `FORCE_MANUAL_RETRY=true` allows one-off override of `email_not_found` retry gate for deliberate recovery runs.
+- Local run recovery completed: installed missing local NLP dependencies (`spacy`, `en_core_web_sm`) and re-ran with manual retry override.
+- First real outreach send confirmed locally: `WTFox AI` contact `Sarah <sarah@wtfox.ai>` sent successfully; pipeline used fallback writer when Gemini quota was exhausted.
 - `data/manual_queue.json` populated with 4 curated entries using verified company domains:
 	- `unque.me`
 	- `wtfox.ai`
@@ -145,13 +149,14 @@
 | 2026-03-28 | 8         | Module 7: main.py + daily workflow    | Automation live                 |
 | 2026-03-30 | 9         | Added 4 manual queue company entries  | Next run should attempt finder on real company domains |
 | 2026-03-31 | 10        | Finder yield refinement + tests 57/57 | Re-run pipeline and verify first sends |
+| 2026-03-31 | 11        | Runtime dedupe gating + manual retry path; first local send confirmed | Continue improving finder hit-rate for remaining manual domains |
 
 ---
 
 ## Metrics (Updated weekly once live):
-- Total emails sent: 0
+- Total emails sent: 1
 - Total replies: 0
-- Reply rate: N/A
-- Bounce rate: N/A
+- Reply rate: 0.0%
+- Bounce rate: 0.0%
 - Opt-out rate: N/A
-- Best performing subject variant: N/A
+- Best performing subject variant: 1 (current sample size: 1)
