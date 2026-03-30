@@ -79,6 +79,6 @@ jobs:
             echo "db/state.db not found; skipping commit step"
             exit 0
           fi
-          git add db/state.db
+          git add -f db/state.db
           git diff --staged --quiet || git commit -m "chore(state): update state.db [skip ci]"
           git push
