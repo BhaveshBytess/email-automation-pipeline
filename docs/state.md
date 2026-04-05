@@ -23,6 +23,18 @@
 - Full suite passing after integration: 54/54
 
 ## Operational Updates:
+- Added reusable governance bootstrap toolkit under `governance/` to scaffold the 7-file framework into any target project.
+- Implemented `governance/bootstrap_governance.py` (CLI) with token rendering (`PROJECT_NAME`, `TODAY`, `CURRENT_MODULE`, `CURRENT_TASK`), dry-run mode, and force-overwrite mode.
+- Added PowerShell wrapper `governance/init-governance.ps1` for one-command setup from Windows terminals.
+- Added template pack at `governance/templates/` for:
+	- `active_context.md`
+	- `docs/agent_core.md`
+	- `docs/agent_project.md`
+	- `docs/contracts.md`
+	- `docs/build_plan.md`
+	- `docs/decisions.md`
+	- `docs/state.md`
+- Verified bootstrap with dry-run against current repo and full scaffold run in temporary directory (`%TEMP%/gov_bootstrap_test`) producing all 7 files.
 - Controlled retry validation after finder extraction upgrade completed: manual retry candidates (3 domains) still resolved to `no_role_match`, with no new queue entries and no new sends.
 - Finder L1 email extraction strengthened in `src/finder/waterfall.py`:
 	- now parses `mailto:` links directly from HTML,
@@ -163,6 +175,7 @@
 | 2026-03-31 | 13        | Gemini key validation: 2.5-flash works, 2.0-flash quota-blocked; writer default updated | Monitor quota stability and migrate SDK when ready |
 | 2026-03-31 | 14        | Finder email extraction upgraded (mailto + obfuscation), tests expanded | Re-run target domains to measure direct-find lift |
 | 2026-03-31 | 15        | Controlled retry run executed; no new direct finds on remaining 3 manual domains | Improve name discovery signals before next retry |
+| 2026-04-05 | 16        | Built portable 7-file governance bootstrap toolkit with templates and CLI | Reuse toolkit in new projects and refine templates per domain |
 
 ---
 

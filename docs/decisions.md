@@ -264,6 +264,15 @@ Correct behavior.
 
 ---
 
+## D020: Package 7-File Governance as Reusable Bootstrap Toolkit
+**Date:** 2026-04-05
+**Context:** The governance workflow proved effective but was manually recreated per project, causing setup friction and inconsistency.
+**Decision:** Add a portable scaffolding toolkit (`governance/`) with template files plus CLI/PowerShell bootstrap commands to generate the same 7-file framework in any target repository.
+**Consequence:** Governance setup becomes repeatable and near one-command; future projects can start with consistent operational controls.
+**Status:** Accepted
+
+---
+
 ## Template For New Decisions
 
 ## DXXX: [Title]
